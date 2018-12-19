@@ -25,7 +25,7 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
 database = config['DEFAULT']['database']
-import mainwindow, pagetwo, addgroupdialog, tablewindow
+import mainwindow, tablewindow
 
 class BeeTracker(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow):
 
@@ -38,8 +38,9 @@ class BeeTracker(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow):
         self.button_Config()
         self.location_Config()
 
-    def test(self):
-        self.msg('','TEST BUTTON','You pushed a testButton','')
+#####
+##### INITIAL CONFIG
+#####
 
     def initial_Config(self):
         self.create_Tables()
@@ -73,23 +74,25 @@ class BeeTracker(QtWidgets.QMainWindow, mainwindow.Ui_MainWindow):
         self.orderbyBox.addItems(self.orderbygroups)
 
     def button_Config(self):
-        self.toggleallButton.clicked.connect(self.toggle_all)
-        self.addlocationButton.clicked.connect(self.save_location)
-        self.testButton.clicked.connect(self.test)
-        self.test2Button.clicked.connect(self.test)
-        self.test3Button.clicked.connect(self.get_Cbvalues)
-        self.searchButton.clicked.connect(self.search)
-        self.search2Button.clicked.connect(self.adv_Searchtwo)
-        self.saveButton.clicked.connect(self.save)
+        # Main Program
         self.quitButton.clicked.connect(self.close)
 
-    def write_Mainpage(self):
-        welcomemessage = '''Welcome to Bee Tracker \n
-To Get started please add some hives in the "Add" Tab, and then search to your hearts content!'''
-        self.maintextBrowser.setText(welcomemessage)
+        # Add Location Tab
+        self.addlocationButton.clicked.connect(self.save_Location)
+        self.viewlocationButton.clicked.connect(self.view_Locations)
+
+        # Add Hive Tab
+        self.testButton.clicked.connect(self.test)
+        self.test2Button.clicked.connect(self.test)
+        self.searchButton.clicked.connect(self.search)
+        self.saveButton.clicked.connect(self.save)
+
+        # Advanced Search Tab
+        self.toggleallButton.clicked.connect(self.toggle_All)
+        self.test3Button.clicked.connect(self.get_Cbvalues)
+        self.search2Button.clicked.connect(self.adv_Searchtwo)
 
     def location_Config(self):
-        global database
         conn = sqlite3.connect(database)
         curs = conn.cursor()
         curs.execute('INSERT INTO location(location) values("All");')
@@ -105,6 +108,11 @@ To Get started please add some hives in the "Add" Tab, and then search to your h
         self.location2Box.addItems(self.locations)
         conn.close()
         return self.locations
+
+    def write_Mainpage(self):
+        welcomemessage = '''Welcome to Bee Tracker \n
+To Get started \n -Add Your first location in the "Add Location" tab \n -Then add some hives in the "Add Hives" tab \n -then search to your hearts content!'''
+        self.maintextBrowser.setText(welcomemessage)
 
     def msg(self, messagetype, messagetitle, infotext, messagetext):
         if messagetype == 'info':
@@ -144,43 +152,16 @@ To Get started please add some hives in the "Add" Tab, and then search to your h
         conn.commit()
         conn.close()
 
-    def add_location(self, locationtoenter):
-        global database
-        conn = sqlite3.connect(database)
-        curs = conn.cursor()
-        print("New Location: {}".format(locationtoenter))
-        if len(locationtoenter) > 0:
-            location = locationtoenter
-            print("Updating Groups List...")
-            curs.execute("INSERT INTO location(location) VALUES (?) ", (location,))
-            conn.commit()
-        self.msg('info', 'Info', 'Added - {}'.format(location), '')
-        conn.close()
-        self.location_Config()
+#####
+##### TEST FUNCTION
+#####
 
-    def save_location(self):
-        conn = sqlite3.connect(database)
-        curs = conn.cursor()
+    def test(self):
+        self.msg('','TEST BUTTON','You pushed a testButton','')
 
-        name = self.locationnameEdit.text()
-        address = self.locationaddressEdit.text()
-        locationtype = self.locationtypeBox.currentText()
-        notes = self.locationnotesEdit.toPlainText()
-
-        print("New Location: {}".format(name))
-        if len(name) > 0:
-            print("Updating Groups List...")
-            curs.execute("INSERT INTO location(location, address, type, notes) VALUES (?,?,?,?) ", (name, address, locationtype, notes))
-            conn.commit()
-        self.msg('info', 'Info', 'Added - {}'.format(name), '')
-        conn.close()
-        self.location_Config()
-
-
-    def get_Location(self):
-        location = addlocationPage()
-        if location.exec_():
-            self.add_location(location.newlocationEntry.text())
+#####
+##### ADD HIVE TAB
+#####
 
     def save(self):
         date = datetime.now().strftime('%Y-%m-%d')
@@ -229,11 +210,35 @@ To Get started please add some hives in the "Add" Tab, and then search to your h
         elif len(hive) == 0:
             self.msg('','Info','Please enter a Hive Name','')
 
-    def goto_Pagetwo(self):
-        dialog = Pagetwo(self)
-        self.dialogs.append(dialog)
-        dialog.show()
+    # def goto_Pagetwo(self):
+        # dialog = Pagetwo(self)
+        # self.dialogs.append(dialog)
+        # dialog.show()
 
+#####
+##### ADD LOCATION TAB
+#####
+
+    def save_Location(self):
+        conn = sqlite3.connect(database)
+        curs = conn.cursor()
+
+        name = self.locationnameEdit.text()
+        address = self.locationaddressEdit.text()
+        locationtype = self.locationtypeBox.currentText()
+        notes = self.locationnotesEdit.toPlainText()
+
+        print("New Location: {}".format(name))
+        if len(name) > 0:
+            print("Updating Groups List...")
+            curs.execute("INSERT INTO location(location, address, type, notes) VALUES (?,?,?,?) ", (name, address, locationtype, notes))
+            conn.commit()
+        self.msg('info', 'Info', 'Added - {}'.format(name), '')
+        conn.close()
+        self.location_Config()
+
+    def view_Locations(self):
+        print("View Locations Button")
 #####
 ##### SEARCH TAB
 #####
@@ -364,7 +369,7 @@ To Get started please add some hives in the "Add" Tab, and then search to your h
             curs.close()
             conn.close()
 
-    def toggle_all(self):
+    def toggle_All(self):
         x = self.get_Cbvalues()
         print(x)
         print("0: {}".format(x.count(0)))
@@ -412,37 +417,6 @@ class DisplayPage(QtWidgets.QMainWindow, tablewindow.Ui_MainWindow):
         self.setupUi(self)
 
         self.actionClose_2.triggered.connect(self.close)
-        self.actionSave_As.triggered.connect(self.saveas_Button)
-
-    def saveas_Button(self):
-        widget = self.table
-        pixmap = QtGui.QPixmap(widget.size())
-        widget.render(pixmap)
-        pixmap.save('save.png', 'PNG', 100)
-        #pix=widget.grab()
-        #widget.render(pix)
-        #pix.save("save.png")
-
-class addlocationPage(QtWidgets.QDialog, addgroupdialog.Ui_Dialog):
-
-    def __init__(self, parent=None):
-        super(addlocationPage, self).__init__()
-        self.setupUi(self)
-
-class Pagetwo(QtWidgets.QMainWindow, pagetwo.Ui_MainWindow):
-
-    def __init__(self, parent=None):
-        super(Pagetwo, self).__init__()
-        self.setupUi(self)
-        self.dialogs = []
-
-        self.pageoneButton.clicked.connect(self.goto_mainwindow)
-        self.quitButton.clicked.connect(self.close)
-
-    def goto_mainwindow(self):
-        dialog = BeeTracker(self)
-        self.dialogs.append(dialog)
-        dialog.show()
 
 def main():
     app = QApplication(sys.argv)
