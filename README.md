@@ -9,8 +9,8 @@ A program for keeping track of your hives
   - ConfigParser 
   - xlsxwriter 
   
-  ## Usage  
-  Clone the repository. 
+## Usage  
+Clone the repository. 
   ```shell 
   $ cd BeeTracker 
   $ python Beetracker.py 
